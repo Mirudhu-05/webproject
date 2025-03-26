@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie & TV Show Search</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        #search-container {
+            margin-bottom: 20px;
+        }
+        #results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .result-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .skeleton-loader {
+            background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+            animation: skeleton-loading 1s linear infinite;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .error-message {
+          color: red;
+          text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search movies, shows, actors...">
+        <button id="search-button">Search</button>
+    </div>
+
+    <div id="results-container">
+        </div>
+
+    <div id="pagination-container" class="pagination">
+        </div>
+
+    <script>
+        const apiKey = 'YOUR_TMDB_API_KEY'; // Replace with your TMDB API key
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsContainer = document.getElementById('results-container');
+        const paginationContainer = document.getElementById('pagination-container');
+
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentQuery = '';
+        let cache = {};
+
+        async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                throw error;
+            }
+        }
+
+        async function search(query, page = 1) {
+            currentQuery = query;
+            currentPage = page;
+
+            if (cache[query] && cache[query][page]) {
+                displayResults(cache[query][page].results);
+                updatePagination();
+                return;
+            }
+
+            resultsContainer.innerHTML = '<div class="skeleton-loader"></div><div class="skeleton-loader"></div><div class="skeleton-loader"></div><div class="skeleton-loader"></div>';
+
+            try {
+                const url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(query)}&page=${page}`;
+                const data = await fetchWithRetry(url);
+
+                if (!cache[query]) {
+                    cache[query] = {};
+                }
+                cache[query][page] = data;
+
+                totalPages = data.total_pages;
+                displayResults(data.results);
+                updatePagination();
+
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsContainer.innerHTML = '<div class="error-message">Search failed. Please try again later.</div>';
+                paginationContainer.innerHTML = '';
+            }
+        }
+
+        function displayResults(results) {
+            resultsContainer.innerHTML = '';
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.classList.add('result-item');
+
+                let imageUrl = 'placeholder.png';
+                if (result.poster_path) {
+                    imageUrl = `https://image.tmdb.org/t/p/w200${result.poster_path}`;
+                } else if (result.profile_path) {
+                    imageUrl = `https://image.tmdb.org/t/p/w200${result.profile_path}`;
+                }
+
+                item.innerHTML = `
+                    <img src="${imageUrl}" alt="${result.title || result.name}">
+                    <h3>${result.title || result.name}</h3>
+                    <p>${result.media_type}</p>
+                `;
+                resultsContainer.appendChild(item);
+            });
+        }
+
+        function updatePagination() {
+            paginationContainer.innerHTML = '';
+            if(totalPages > 1){
+              if (currentPage > 1) {
+                  const prevButton = document.createElement('button');
+                  prevButton.textContent = 'Previous';
+                  prevButton.addEventListener('click', () => search(currentQuery, currentPage - 1));
+                  paginationContainer.appendChild(prevButton);
+              }
+
+              if (currentPage < totalPages) {
+                  const nextButton = document.createElement('button');
+                  nextButton.textContent = 'Next';
+                  nextButton.addEventListener('click', () => search(currentQuery, currentPage + 1));
+                  paginationContainer.appendChild(nextButton);
+              }
+            }
+
+        }
+
+        searchButton.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                search(query);
+            }
+        });
+
+    </script>
+</body>
+</html>

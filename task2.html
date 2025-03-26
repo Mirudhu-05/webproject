@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actor Profile</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #actor-profile {
+            width: 80%;
+            max-width: 800px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #actor-profile img {
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+            border-radius: 8px;
+        }
+
+        #movie-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .movie-item {
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .movie-item img {
+            max-width: 100px;
+            height: auto;
+            display: block;
+            margin: 0 auto 5px;
+            border-radius: 5px;
+        }
+
+        #loading {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="loading">Loading Actor Profile...</div>
+    <div id="actor-profile" style="display: none;">
+        <img id="profile-image" src="" alt="Actor Profile">
+        <h1 id="actor-name"></h1>
+        <p id="actor-bio"></p>
+        <h2>Movies</h2>
+        <div id="movie-list"></div>
+    </div>
+
+    <script>
+        const actorProfile = document.getElementById('actor-profile');
+        const loading = document.getElementById('loading');
+
+        // Mock API Data (Replace with your actual API or Firestore data)
+        const mockActor = {
+            name: 'Leonardo DiCaprio',
+            bio: 'Leonardo DiCaprio is an American actor, producer, and environmental activist. He has often played unconventional roles, particularly in biopics and period films. Born in 1974.',
+            profileImage: 'https://m.media-amazon.com/images/M/MV5BMjI0MTg3MzI0Ml5BMl5BanBnXkFtZTcwMzQyODU2Mw@@._V1_UY317_CR16,0,214,317_AL_.jpg',
+            movies: [
+                { title: 'Inception', poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTY5OTM0Mw@@._V1_FMjpg_UX1000_.jpg' },
+                { title: 'The Wolf of Wall Street', poster: 'https://m.media-amazon.com/images/M/MV5BMjIxMjgxNTk0Nl5BMl5BanBnXkFtZTgwMzIyMDk5NzE@._V1_FMjpg_UX1000_.jpg' },
+                { title: 'Titanic', poster: 'https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWFmNTUtMTVjYTZmZGMxM2UzXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_FMjpg_UX1000_.jpg'},
+            ],
+        };
+
+        // Simulate API fetch (replace with actual fetch or Firestore retrieval)
+        setTimeout(() => {
+            document.getElementById('profile-image').src = mockActor.profileImage;
+            document.getElementById('actor-name').textContent = mockActor.name;
+            document.getElementById('actor-bio').textContent = mockActor.bio;
+
+            const movieList = document.getElementById('movie-list');
+            mockActor.movies.forEach(movie => {
+                const movieItem = document.createElement('div');
+                movieItem.classList.add('movie-item');
+                movieItem.innerHTML = `<img src="${movie.poster}" alt="${movie.title}"><p>${movie.title}</p>`;
+                movieList.appendChild(movieItem);
+            });
+
+            loading.style.display = 'none';
+            actorProfile.style.display = 'block';
+        }, 500); // Simulate network latency
+
+    </script>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actor Profile</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .actor-profile {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .actor-profile img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .actor-profile h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .actor-profile p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .movie-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .movie-list li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="actor-profile" id="actorProfile">
+    <img src="" alt="Actor Profile" id="actorImage">
+    <h1 id="actorName">Loading...</h1>
+    <p id="actorBio">Loading biography...</p>
+    <h2>Movies</h2>
+    <ul class="movie-list" id="movieList">
+        <li>Loading movies...</li>
+    </ul>
+</div>
+
+<script>
+    async function fetchActorData(actorId) {
+        
+        const mockData = {
+            "123": {
+                name: "Robert Downey Jr.",
+                bio: "Robert Downey Jr. is an American actor. He is known for playing the role of Tony Stark/Iron Man in the Marvel Cinematic Universe.",
+                imageUrl: "https://via.placeholder.com/200", 
+                movies: ["Iron Man", "Avengers: Endgame", "Sherlock Holmes"]
+            },
+            "456":{
+                name: "Scarlett Johansson",
+                bio: "Scarlett Johansson is an American actress. She is known for playing the role of Natasha Romanoff / Black Widow in the Marvel Cinematic Universe.",
+                imageUrl: "https://via.placeholder.com/200",
+                movies: ["Avengers: Endgame", "Marriage Story", "Lucy"]
+            }
+        };
+
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(mockData[actorId]);
+            }, 500); 
+        });
+
+    }
+
+    async function displayActorProfile(actorId) {
+        const actorData = await fetchActorData(actorId);
+
+        if (actorData) {
+            document.getElementById("actorImage").src = actorData.imageUrl;
+            document.getElementById("actorName").textContent = actorData.name;
+            document.getElementById("actorBio").textContent = actorData.bio;
+
+            const movieList = document.getElementById("movieList");
+            movieList.innerHTML = ""; 
+            actorData.movies.forEach(movie => {
+                const movieItem = document.createElement("li");
+                movieItem.textContent = movie;
+                movieList.appendChild(movieItem);
+            });
+        } else {
+            document.getElementById("actorProfile").innerHTML = "<p>Actor not found.</p>";
+        }
+    }
+
+   
+    const urlParams = new URLSearchParams(window.location.search);
+    const actorId = urlParams.get('id') || "123"; 
+    displayActorProfile(actorId);
+</script>
+
+</body>
+</html>
+
+
